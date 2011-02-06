@@ -196,3 +196,9 @@ redisAsyncHandleWrite(redisAsyncContext *ac)
 
 void
 redisAsyncDisconnect(redisAsyncContext *ac)
+
+void
+redisAsyncGetFd(redisAsyncContext *ac)
+    PPCODE:
+        EXTEND(SP, 1);
+        PUSHs(sv_2mortal(newSViv(ac->c.fd)));

@@ -4,22 +4,27 @@ use Test::More;
 use Test::Exception;
 
 use Hiredis::Raw;
+use AnyEvent;
 
-my $called = 0;
-my $redis = Hiredis::Async->new('localhost');
+my $cv = AE::cv;
+$cv->begin for 1..5;
+
 my @values;
 my $pong;
+my $redis = Hiredis::Async->new('localhost');
 
-$redis->_Command(['PING'], sub { $pong = $_[0]; $called++ });
-$redis->_Command([qw/LPUSH key value/], sub { $called++ }) for 1..3;
-$redis->_Command([qw/LRANGE key 0 2/], sub { @values = @{$_[0]}; $called++ });
+cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
 
-for (1..100){
-    $redis->HandleWrite();
-    $redis->HandleRead();
-}
+$redis->_Command(['PING'], sub { $pong = $_[0]; $cv->end });
+$redis->_Command([qw/LPUSH key value/], sub { $cv->end }) for 1..3;
+$redis->_Command([qw/LRANGE key 0 2/], sub { @values = @{$_[0]}; $cv->end });
 
-cmp_ok $called, '>=', 5, 'called callback';
+
+my $r = AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $redis->HandleRead } );
+my $w = AnyEvent->io( fh => $fd, poll => 'w', cb => sub { $redis->HandleWrite } );
+
+$cv->recv;
+
 is $pong, 'PONG', 'got PONG from PING';
 is_deeply \@values, [qw/value value value/], 'got values';
 done_testing;
