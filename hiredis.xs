@@ -96,6 +96,8 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
 
     result = redisReplyToSV(reply);
     dSP;
+    ENTER;
+    SAVETMPS;
     PUSHMARK(SP);
     XPUSHs(result); /* result */
     if(reply->type == REDIS_REPLY_ERROR){ /* is success? */
@@ -108,6 +110,8 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
 
     Perl_call_sv(aTHX_ callback, G_DISCARD);
 
+    FREETMPS;
+    LEAVE;
 }
 
 MODULE = Hiredis::Raw	PACKAGE = Hiredis::Raw   PREFIX = redis
