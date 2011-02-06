@@ -10,9 +10,10 @@ $pkg->set_inc('-I/home/wjackson/hiredis');
 $pkg->set_libs('-L/home/wjackson/hiredis -lhiredis');
 $pkg->add_xs('hiredis.xs');
 $pkg->add_pm(
-    './lib/Hiredis/Raw.pm'           => '$(INST_LIBDIR)/Raw.pm',
-    './lib/Hiredis/Async.pm'         => '$(INST_LIBDIR)/Async.pm',
-    './lib/Hiredis/Raw/Constants.pm' => '$(INST_LIBDIR)/Raw/Constants.pm',
+    './lib/Hiredis/Raw.pm'            => '$(INST_LIBDIR)/Raw.pm',
+    './lib/Hiredis/Async.pm'          => '$(INST_LIBDIR)/Async.pm',
+    './lib/Hiredis/Async/AnyEvent.pm' => '$(INST_LIBDIR)/Async/AnyEvent.pm',
+    './lib/Hiredis/Raw/Constants.pm'  => '$(INST_LIBDIR)/Raw/Constants.pm',
 );
 $pkg->add_typemaps('typemap');
 $pkg->save_config('build/IFiles.pm');
