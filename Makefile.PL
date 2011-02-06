@@ -11,6 +11,7 @@ $pkg->set_libs('-L/home/wjackson/hiredis -lhiredis');
 $pkg->add_xs('hiredis.xs');
 $pkg->add_pm(
     './lib/Hiredis/Raw.pm'           => '$(INST_LIBDIR)/Raw.pm',
+    './lib/Hiredis/Async.pm'         => '$(INST_LIBDIR)/Async.pm',
     './lib/Hiredis/Raw/Constants.pm' => '$(INST_LIBDIR)/Raw/Constants.pm',
 );
 $pkg->add_typemaps('typemap');
