@@ -106,6 +106,16 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
 void
 redisAsyncFree(redisAsyncContext *ac)
 
+void
+redisAsyncIsAllocated(SV *self)
+    PPCODE:
+        void *s = xs_object_magic_get_struct(aTHX_ SvRV(self));
+        EXTEND(SP, 2);
+        if(s == NULL)
+            PUSHs(&PL_sv_no);
+        else
+            PUSHs(&PL_sv_yes);
+
 redisErrorCode
 redisAsync_Command(redisAsyncContext *ac, AV *args, SV *callback)
     PREINIT:

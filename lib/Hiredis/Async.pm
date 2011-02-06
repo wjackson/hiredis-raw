@@ -11,7 +11,7 @@ sub new {
 
 sub DESTROY {
     my $self = shift;
-    $self->Free;
+    $self->Free if $self->IsAllocated;
 }
 
 1;
