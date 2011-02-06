@@ -191,7 +191,7 @@ redisAsync_Command(redisAsyncContext *ac, AV *args, SV *callback)
             }
         }
 
-        c->my_perl  = my_perl;
+        c->my_perl  = PERL_GET_CONTEXT;
         c->callback = SvREFCNT_inc_simple(callback);
         c->argv     = argv;
         c->arglen   = arglen;
