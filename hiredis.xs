@@ -22,6 +22,9 @@ typedef struct {
 
 SV* redisReplyToSV(redisReply *reply){
     SV *result;
+    AV *array;
+    int i;
+    struct redisReply **elements;
 
     if(reply){
         switch(reply->type){
@@ -33,6 +36,17 @@ SV* redisReplyToSV(redisReply *reply){
 
             case REDIS_REPLY_INTEGER:
                 result = sv_2mortal(newSViv(reply->integer));
+                break;
+
+            case REDIS_REPLY_ARRAY:
+                array = newAV();
+                for(i = 0; i < reply->elements; i++){
+                    elements = reply->element;
+                    result = redisReplyToSV(elements[i]);
+                    av_push(array, result);
+                    result = NULL;
+                }
+                result = sv_2mortal(newRV_inc((SV *)array));
                 break;
 
             default:
