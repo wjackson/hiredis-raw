@@ -20,6 +20,33 @@ typedef struct {
     unsigned int arglen_ok:1;
 } callbackContext;
 
+SV* redisReplyToSV(redisReply *reply){
+    SV *result;
+
+    if(reply){
+        switch(reply->type){
+            case REDIS_REPLY_STATUS:
+            case REDIS_REPLY_STRING:
+            case REDIS_REPLY_ERROR:
+                result = sv_2mortal(newSVpvn(reply->str, reply->len));
+                break;
+
+            case REDIS_REPLY_INTEGER:
+                result = sv_2mortal(newSViv(reply->integer));
+                break;
+
+            default:
+                result = &PL_sv_undef;
+                break;
+       }
+    }
+    else {
+        result = &PL_sv_undef;
+    }
+
+    return result;
+}
+
 void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privdata){
     SV *result;
     callbackContext *c = _privdata;
@@ -41,28 +68,8 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     }
 
     Safefree(c);
-    if(reply){
-        switch(reply->type){
-            case REDIS_REPLY_STATUS:
-            case REDIS_REPLY_STRING:
-            case REDIS_REPLY_ERROR:
-                result = sv_2mortal(newSVpvn(reply->str, reply->len));
-                break;
 
-            case REDIS_REPLY_INTEGER:
-                result = sv_2mortal(newSViv(reply->integer));
-                break;
-
-            default:
-                result = &PL_sv_undef;
-                break;
-
-        }
-    }
-    else {
-         result = &PL_sv_undef;
-    }
-
+    result = redisReplyToSV(reply);
     dSP;
     PUSHMARK(SP);
     XPUSHs(result); /* result */
