@@ -63,25 +63,36 @@ SV* redisReplyToSV(redisReply *reply){
 
 void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privdata){
     SV *result;
-    callbackContext *c = _privdata;
-    redisReply *reply = _reply;
-    SV *callback = c->callback;
-    PerlInterpreter *my_perl = c->my_perl;
+    callbackContext *c;
+    redisReply *reply;
+    SV *callback;
+    PerlInterpreter *my_perl;
 
-    if(c == NULL)
+    if(_privdata == NULL)
         croak("OH NOES!  Null privdata passed to redisAsyncHandleCallback!");
 
-    if(c->argv_ok){
-        Safefree(c->argv);
-        c->argv_ok = 0;
-    }
+    reply = _reply;
+    c = _privdata;
+    my_perl = c->my_perl;
+    callback = c->callback;
 
-    if(c->arglen_ok){
-        Safefree(c->arglen);
-        c->arglen_ok = 0;
-    }
+    if(_reply == NULL) { /* we're shutting down or something */
+        if(c->argv_ok){
+            Safefree(c->argv);
+            c->argv_ok = 0;
+        }
 
-    Safefree(c);
+        if(c->arglen_ok){
+            Safefree(c->arglen);
+            c->arglen_ok = 0;
+        }
+
+        SvREFCNT_dec(callback);
+        c->callback_ok = 0;
+
+        Safefree(c);
+        return;
+    }
 
     result = redisReplyToSV(reply);
     dSP;
@@ -96,7 +107,7 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     PUTBACK;
 
     Perl_call_sv(aTHX_ callback, G_DISCARD);
-    SvREFCNT_dec(callback);
+
 }
 
 MODULE = Hiredis::Raw	PACKAGE = Hiredis::Raw   PREFIX = redis
