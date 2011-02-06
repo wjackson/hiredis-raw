@@ -9,4 +9,9 @@ sub new {
     return $self;
 }
 
+sub DESTROY {
+    my $self = shift;
+    $self->Free;
+}
+
 1;
