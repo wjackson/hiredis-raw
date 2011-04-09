@@ -6,8 +6,8 @@ use ExtUtils::Depends;
 mkdir 'build';
 my $pkg = ExtUtils::Depends->new( 'Hiredis::Raw', 'XS::Object::Magic' );
 
-$pkg->set_inc('-I/home/wjackson/hiredis');
-$pkg->set_libs('-L/home/wjackson/hiredis -lhiredis');
+$pkg->set_inc('-I/usr/local/include/hiredis');
+$pkg->set_libs('-L/usr/local/lib -lhiredis');
 $pkg->add_xs('hiredis.xs');
 $pkg->add_pm(
     './lib/Hiredis/Raw.pm'            => '$(INST_LIBDIR)/Raw.pm',
