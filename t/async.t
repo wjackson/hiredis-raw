@@ -3,28 +3,34 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use Hiredis::Raw;
+use Hiredis::Async;
 use AnyEvent;
+use t::Redis;
 
-my $cv = AE::cv;
-$cv->begin for 1..5;
+test_redis {
+    my $port = shift;
 
-my @values;
-my $pong;
-my $redis = Hiredis::Async->new('localhost');
+    my $redis = Hiredis::Async->new("127.0.0.1", $port);
 
-cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
+    my $cv = AE::cv;
+    $cv->begin for 1..5;
+    
+    my @values;
+    my $pong;
+    
+    cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
+    
+    $redis->_Command(['PING'], sub { $pong = $_[0]; $cv->end });
+    $redis->_Command([qw/LPUSH key value/], sub { $cv->end }) for 1..3;
+    $redis->_Command([qw/LRANGE key 0 2/], sub { @values = @{$_[0]}; $cv->end });
+    
+    
+    my $r = AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $redis->HandleRead } );
+    my $w = AnyEvent->io( fh => $fd, poll => 'w', cb => sub { $redis->HandleWrite } );
+    $cv->recv;
+    
+    is $pong, 'PONG', 'got PONG from PING';
+    is_deeply \@values, [qw/value value value/], 'got values';
+};
 
-$redis->_Command(['PING'], sub { $pong = $_[0]; $cv->end });
-$redis->_Command([qw/LPUSH key value/], sub { $cv->end }) for 1..3;
-$redis->_Command([qw/LRANGE key 0 2/], sub { @values = @{$_[0]}; $cv->end });
-
-
-my $r = AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $redis->HandleRead } );
-my $w = AnyEvent->io( fh => $fd, poll => 'w', cb => sub { $redis->HandleWrite } );
-
-$cv->recv;
-
-is $pong, 'PONG', 'got PONG from PING';
-is_deeply \@values, [qw/value value value/], 'got values';
 done_testing;
