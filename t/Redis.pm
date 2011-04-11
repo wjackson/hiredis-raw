@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use Test::TCP;
 use Test::More;
-use Hiredis::Async;
 use FindBin;
 
 use base qw(Exporter);
@@ -47,4 +46,3 @@ sub rewrite_redis_conf {
 END { unlink $_ for "t/redis.conf", "t/dump.rdb" }
 
 1;
-
