@@ -22,9 +22,21 @@ has 'watchers' => (
     lazy_build => 1,
 );
 
+has 'host' => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => '127.0.0.1',
+);
+
+has 'port' => (
+    is      => 'ro',
+    isa     => 'Int',
+    default => 6379,
+);
+
 sub _build_redis {
     my $self = shift;
-    return Hiredis::Async->new;
+    return Hiredis::Async->new($self->host, $self->port);
 }
 
 sub _build_watchers {
@@ -45,3 +57,11 @@ sub BUILD {
 __PACKAGE__->meta->make_immutable;
 
 1;
+
+__END__
+
+=head1 NAME
+
+Hiredis::Async::AnyEvent - AnyEvent interface to hiredis.
+
+=head1 SYNOPSIS
