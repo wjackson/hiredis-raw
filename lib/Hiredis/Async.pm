@@ -1,6 +1,7 @@
 package Hiredis::Async;
 use strict;
 use warnings;
+use Hiredis::Raw;
 
 sub new {
     my ($class, @connect_args) = @_;

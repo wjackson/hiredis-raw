@@ -1,8 +1,7 @@
 package Hiredis::Async::AnyEvent;
-# ABSTRACT:
 use Moose;
 use namespace::autoclean;
-use Hiredis::Raw;
+use Hiredis::Async;
 use AnyEvent;
 
 has 'redis' => (
