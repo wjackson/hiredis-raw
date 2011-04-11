@@ -1,5 +1,6 @@
 package t::Redis;
 use strict;
+use warnings;
 use Test::TCP;
 use Test::More;
 use Hiredis::Async;
