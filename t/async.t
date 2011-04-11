@@ -7,7 +7,11 @@ use Hiredis::Async;
 use AnyEvent;
 use t::Redis;
 
-{ # bogus port
+{ # Connection failure test
+
+    # Connection problems are often not discovered until the first command is
+    # executed. Here we test that they are noticed and reported properly.
+
     my $redis = Hiredis::Async->new('127.0.0.1', 12345);
     my $cv    = AE::cv;
     $cv->begin;
@@ -26,12 +30,15 @@ use t::Redis;
     my $w = AnyEvent->io(
         fh   => $fd,
         poll => 'w',
-        cb   => sub { $redis->HandleWrite },
+        cb   => sub {
+            throws_ok { $redis->HandleWrite } qr/Connection refused/, 'bad port';
+            $cv->send;
+        },
     );
 
     $cv->recv;
 
-    is $pong, 'PONG', 'no PONG from PING';
+    is $pong, undef, 'no PONG from PING';
 };
 
 test_redis {
@@ -50,7 +57,6 @@ test_redis {
     $redis->_Command(['PING'], sub { $pong = $_[0]; $cv->end });
     $redis->_Command([qw/LPUSH key value/], sub { $cv->end }) for 1..3;
     $redis->_Command([qw/LRANGE key 0 2/], sub { @values = @{$_[0]}; $cv->end });
-    
     
     my $r = AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $redis->HandleRead } );
     my $w = AnyEvent->io( fh => $fd, poll => 'w', cb => sub { $redis->HandleWrite } );

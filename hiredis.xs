@@ -61,6 +61,18 @@ SV* redisReplyToSV(redisReply *reply){
     return result;
 }
 
+void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
+    if (ac->err) {
+        croak("Connect error: %s", ac->errstr);
+    }
+}
+
+void redisDisconnectHandleCallback(const struct redisAsyncContext *ac, int status) {
+    if (ac->err) {
+        croak("Disconnect error: %s", ac->errstr);
+    }
+}
+
 void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privdata){
     SV *result;
     callbackContext *c;
@@ -68,8 +80,13 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     SV *callback;
     PerlInterpreter *my_perl;
 
-    if(_privdata == NULL)
+    if (ac->err) {
+        croak("Command failed: %s", ac->errstr);
+    }
+
+    if(_privdata == NULL) {
         croak("OH NOES!  Null privdata passed to redisAsyncHandleCallback!");
+    }
 
     reply = _reply;
     c = _privdata;
@@ -134,9 +151,12 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
         redisAsyncContext *ac;
     CODE:
         ac = redisAsyncConnect(host, port);
+        redisAsyncSetConnectCallback(ac, &redisConnectHandleCallback);
+        redisAsyncSetDisconnectCallback(ac, &redisDisconnectHandleCallback);
         if (ac->err) {
             croak("Failed to create async connection: %s", ac->errstr);
         }
+
         xs_object_magic_attach_struct(aTHX_ SvRV(self), ac);
 
 void
