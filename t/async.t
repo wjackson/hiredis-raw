@@ -7,6 +7,33 @@ use Hiredis::Async;
 use AnyEvent;
 use t::Redis;
 
+{ # bogus port
+    my $redis = Hiredis::Async->new('127.0.0.1', 12345);
+    my $cv    = AE::cv;
+    $cv->begin;
+
+    cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
+
+    my $pong;
+    $redis->_Command(['PING'], sub { $pong = $_[0]; $cv->end } );
+
+    my $r = AnyEvent->io(
+        fh   => $fd,
+        poll => 'r',
+        cb   => sub { $redis->HandleRead },
+    );
+
+    my $w = AnyEvent->io(
+        fh   => $fd,
+        poll => 'w',
+        cb   => sub { $redis->HandleWrite },
+    );
+
+    $cv->recv;
+
+    is $pong, 'PONG', 'no PONG from PING';
+};
+
 test_redis {
     my $port = shift;
 
