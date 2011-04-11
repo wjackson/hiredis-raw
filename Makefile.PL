@@ -31,8 +31,14 @@ ppport;
 
 configure_requires 'ExtUtils::Depends';
 configure_requires 'XS::Object::Magic';
+requires 'Sub::Exporter';
 requires 'XS::Object::Magic';
+test_requires 'AnyEvent';
 test_requires 'Test::More';
 test_requires 'Test::Exception';
+test_requires 'Test::TCP';
+
+# NOTE: running Hiredis::Async::AnyEvent requires Moose,
+# namespace::autoclean, and AnyEvent.
 
 WriteAll;
