@@ -34,6 +34,7 @@ configure_requires 'XS::Object::Magic';
 requires 'Sub::Exporter';
 requires 'XS::Object::Magic';
 test_requires 'AnyEvent';
+test_requires 'File::Which';
 test_requires 'Test::More';
 test_requires 'Test::Exception';
 test_requires 'Test::TCP';

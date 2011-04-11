@@ -4,6 +4,7 @@ use warnings;
 use Test::TCP;
 use Test::More;
 use FindBin;
+use File::Which qw(which);
 
 use base qw(Exporter);
 our @EXPORT = qw(test_redis);
@@ -12,7 +13,7 @@ sub test_redis(&;$) {
     my $cb        = shift;
     my $args      = shift;
 
-    chomp(my $redis_server = `which redis-server`);
+    my $redis_server = which 'redis-server';
     unless ($redis_server && -e $redis_server && -x _) {
         plan skip_all => 'redis-server not found in your PATH';
     }
