@@ -65,3 +65,18 @@ __END__
 Hiredis::Async::AnyEvent - AnyEvent interface to hiredis.
 
 =head1 SYNOPSIS
+
+    my $redis = Hiredis::Async::AnyEvent->new;
+
+    my $done = AE::cv;
+
+    $redis->Command([qw/SET KEY VALUE/], sub {
+        is $_[0], 'OK', 'got ok';
+
+        $redis->Command([qw/GET KEY/], sub {
+            is $_[0], 'VALUE', 'got VALUE for KEY';
+            $done->send;
+        });
+    }); 
+
+    $done->recv;
