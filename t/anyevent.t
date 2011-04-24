@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use t::Redis;
 
@@ -51,5 +52,23 @@ test_redis {
 
     $done->recv;
 };
+
+{ # connection errors
+
+    # Hiredis is lazy about connecting to the redis server so connection
+    # related errors can occur at different times.
+
+    # unresolvable hostname is reported right away
+    throws_ok { Hiredis::Async::AnyEvent->new(host => 'bogus') }
+        qr/Can't resolve/, 'got connection failure';
+
+    # bad port is reported when the first command is run
+    my $redis = Hiredis::Async::AnyEvent->new(port => 12345);
+    my $done  = AE::cv;
+    $redis->Command([qw/GET KEY/], sub { $done->send }); 
+
+    throws_ok { $done->recv } qr/Connection refused/,
+        'got connection exception';
+}
 
 done_testing;
