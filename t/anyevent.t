@@ -2,9 +2,9 @@ use strict;
 use warnings;
 use Test::More;
 
-use Hiredis::Raw::Constants qw(:all);
-use Hiredis::Async::AnyEvent;
 use t::Redis;
+
+use ok 'Hiredis::Async::AnyEvent';
 
 test_redis {
     my $port = shift;
