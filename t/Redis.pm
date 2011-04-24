@@ -22,6 +22,7 @@ sub test_redis(&;$) {
         server => sub {
             my $port = shift;
             rewrite_redis_conf($port);
+            open STDOUT, '>', '/dev/null' or die q/Can't redirect STDOUT/;
             exec "redis-server", "t/redis.conf";
         },
         client => sub {
