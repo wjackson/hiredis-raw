@@ -51,12 +51,14 @@ test_redis {
     
     my @values;
     my $pong;
+    my $error;
     
     cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
     
     $redis->_Command(['PING'], sub { $pong = $_[0]; $cv->end });
     $redis->_Command([qw/LPUSH key value/], sub { $cv->end }) for 1..3;
     $redis->_Command([qw/LRANGE key 0 2/], sub { @values = @{$_[0]}; $cv->end });
+    $redis->_Command([qw/BOGUS/], sub { $error = $_[1]; $cv->end });
     
     my $r = AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $redis->HandleRead } );
     my $w = AnyEvent->io( fh => $fd, poll => 'w', cb => sub { $redis->HandleWrite } );
@@ -64,6 +66,7 @@ test_redis {
     
     is $pong, 'PONG', 'got PONG from PING';
     is_deeply \@values, [qw/value value value/], 'got values';
+    is $error, q{ERR unknown command 'BOGUS'}, 'got error';
 };
 
 done_testing;

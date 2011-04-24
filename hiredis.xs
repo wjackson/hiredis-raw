@@ -116,11 +116,12 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    XPUSHs(result); /* result */
     if(reply->type == REDIS_REPLY_ERROR){ /* is success? */
-        XPUSHs(&PL_sv_no);
+        XPUSHs(&PL_sv_undef);
+        XPUSHs(result);
     }
     else {
+        XPUSHs(result);
         XPUSHs(&PL_sv_yes);
     }
     PUTBACK;

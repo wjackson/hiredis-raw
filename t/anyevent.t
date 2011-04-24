@@ -40,6 +40,15 @@ test_redis {
         }); 
     }
 
+    $redis->Command([qw/BOGUS/], sub {
+        my ($result, $error) = @_;
+
+        is $result, undef, 'got undefined result on error';
+        is $error, q{ERR unknown command 'BOGUS'}, 'got error';
+
+        $done->send;
+    }); 
+
     $done->recv;
 };
 
