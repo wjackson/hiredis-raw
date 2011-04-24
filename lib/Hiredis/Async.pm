@@ -12,7 +12,7 @@ sub new {
 
 sub DESTROY {
     my $self = shift;
-    # $self->Free if $self->IsAllocated;
+    $self->Disconnect if $self->IsAllocated;
 }
 
 1;
