@@ -1,39 +1,20 @@
 package Hiredis::Async::AnyEvent;
 # ABSTRACT: non-blocking hiredis based client
-use Moose;
 use namespace::autoclean;
 use Hiredis::Async;
 use AnyEvent;
 
-has 'redis' => (
-    is         => 'ro',
-    isa        => 'Hiredis::Async',
-    lazy_build => 1,
-    handles    => {
-        GetFd       => 'GetFd',
-        HandleRead  => 'HandleRead',
-        HandleWrite => 'HandleWrite',
-        Command     => '_Command',
-    },
-);
+sub new {
+    my ($class, %args) = @_;
+    my $self = bless {}, $class;
 
-has 'watchers' => (
-    is         => 'ro',
-    isa        => 'ArrayRef',
-    lazy_build => 1,
-);
+    $self->{host}     = $args{host} // 'localhost';
+    $self->{port}     = $args{port} // '6379';
+    $self->{redis}    = $self->_build_redis;
+    $self->{watchers} = $self->_build_watchers;
 
-has 'host' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => '127.0.0.1',
-);
-
-has 'port' => (
-    is      => 'ro',
-    isa     => 'Int',
-    default => 6379,
-);
+    return $self;
+}
 
 sub _build_redis {
     my $self = shift;
@@ -49,13 +30,33 @@ sub _build_watchers {
     ];
 }
 
-sub BUILD {
-    my $self = shift;
-    $self->redis;
-    $self->watchers;
+sub redis {
+    shift->{redis};
 }
 
-__PACKAGE__->meta->make_immutable;
+sub host {
+    shift->{host};
+}
+
+sub port {
+    shift->{port};
+}
+
+sub GetFd {
+    shift->{redis}->GetFd(@_);
+}
+
+sub HandleRead {
+    shift->{redis}->HandleRead(@_);
+}
+
+sub HandleWrite {
+    shift->{redis}->HandleWrite(@_);
+}
+
+sub Command {
+    shift->{redis}->_Command(@_);
+}
 
 1;
 
