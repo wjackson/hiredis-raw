@@ -179,7 +179,7 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
 
         printf("%p\n", self);
         xs_object_magic_attach_struct(aTHX_ SvRV(self), ac);
-        ac->data = self;
+        ac->data = SvRV(self);
 
 void
 redisAsyncFree(redisAsyncContext *ac)
