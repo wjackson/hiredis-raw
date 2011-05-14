@@ -7,6 +7,19 @@
 #include "hiredis.h"
 #include "async.h"
 
+typedef char *sds;
+
+struct sdshdr {
+    int len;
+    int free;
+    char buf[];
+};
+
+static inline size_t sdslen(const sds s) {
+    struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr)));
+    return sh->len;
+}
+
 typedef int redisErrorCode;
 
 typedef struct {
@@ -223,6 +236,15 @@ redisAsyncCommand(redisAsyncContext *ac, AV *args, SV *callback)
         c->callback_ok = c->argv_ok = c->arglen_ok = 1;
 
         RETVAL = redisAsyncCommandArgv(ac, &redisAsyncHandleCallback, c, argc, (const char **) argv, arglen);
+    OUTPUT:
+        RETVAL
+
+int
+redisAsyncBufferLength(redisAsyncContext *ac)
+    CODE:
+        RETVAL = sdslen(ac->c.obuf);
+    OUTPUT:
+        RETVAL
 
 void
 redisAsyncHandleRead(redisAsyncContext *ac)

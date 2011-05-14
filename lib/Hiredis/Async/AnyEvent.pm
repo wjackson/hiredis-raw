@@ -9,17 +9,22 @@ has 'redis' => (
     is         => 'ro',
     isa        => 'Hiredis::Async',
     lazy_build => 1,
-    handles    => [qw(
-        GetFd
-        HandleRead
-        HandleWrite
-        Command
-    )],
+    handles => {
+        GetFd        => 'GetFd',
+        HandleRead   => 'HandleRead',
+        HandleWrite  => 'HandleWrite',
+        _Command     => 'Command',
+        BufferLength => 'BufferLength',
+    },
 );
 
-has 'watchers' => (
+has 'read_watcher' => (
     is         => 'ro',
-    isa        => 'ArrayRef',
+    lazy_build => 1,
+);
+
+has 'write_watcher' => (
+    is         => 'ro',
     lazy_build => 1,
 );
 
@@ -40,19 +45,37 @@ sub _build_redis {
     return Hiredis::Async->new($self->host, $self->port);
 }
 
-sub _build_watchers {
+sub _build_read_watcher {
     my $self = shift;
     my $fd = $self->GetFd;
-    return [
-        AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $self->HandleRead  } ),
-        AnyEvent->io( fh => $fd, poll => 'w', cb => sub { $self->HandleWrite } ),
-    ];
+    return AnyEvent->io( fh => $fd, poll => 'r', cb => sub { $self->HandleRead  } );
+}
+
+sub _build_write_watcher {
+    my $self = shift;
+    my $fd = $self->GetFd;
+    return AnyEvent->io( fh => $fd, poll => 'w', cb => sub {
+        if ($self->BufferLength <= 0) {
+            $self->clear_write_watcher;
+        }
+        else {
+            $self->HandleWrite;
+        }
+    });
+}
+
+sub Command {
+    my ($self, $cmd, $cb) = @_;
+
+    $self->_Command($cmd, $cb);
+
+    $self->write_watcher;
 }
 
 sub BUILD {
     my $self = shift;
     $self->redis;
-    $self->watchers;
+    $self->read_watcher;
 }
 
 __PACKAGE__->meta->make_immutable;
