@@ -33,6 +33,10 @@ typedef struct {
     unsigned int arglen_ok:1;
 } callbackContext;
 
+void redis_async_xs_unmagic (pTHX_ SV *self) {
+    sv_unmagic(self,PERL_MAGIC_ext);
+}
+
 SV* redisReplyToSV(redisReply *reply){
     SV *result;
     AV *array;
@@ -93,10 +97,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     SV *callback;
     PerlInterpreter *my_perl;
 
-    if (ac->err) {
-        croak("Command failed: %s", ac->errstr);
-    }
-
     if(_privdata == NULL) {
         croak("OH NOES!  Null privdata passed to redisAsyncHandleCallback!");
     }
@@ -121,6 +121,13 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
         c->callback_ok = 0;
 
         Safefree(c);
+
+        if (ac->err) {
+            redis_async_xs_unmagic(aTHX_ ac->data);
+
+            croak("Command failed: %s", ac->errstr);
+        }
+
         return;
     }
 
@@ -172,6 +179,7 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
         }
 
         xs_object_magic_attach_struct(aTHX_ SvRV(self), ac);
+        ac->data = SvRV(self);
 
 void
 redisAsyncFree(redisAsyncContext *ac)
@@ -179,9 +187,9 @@ redisAsyncFree(redisAsyncContext *ac)
 void
 redisAsyncIsAllocated(SV *self)
     PPCODE:
-        void *s = xs_object_magic_get_struct(aTHX_ SvRV(self));
+        void *ac = xs_object_magic_get_struct(aTHX_ SvRV(self));
         EXTEND(SP, 1);
-        if(s == NULL)
+        if (ac == NULL)
             PUSHs(&PL_sv_no);
         else
             PUSHs(&PL_sv_yes);
@@ -225,7 +233,6 @@ redisAsyncCommand(redisAsyncContext *ac, AV *args, SV *callback)
             if(elt != NULL){
                 argv[i] = SvPV(*elt, len);
                 arglen[i] = len;
-                /* printf("array element %d:%s,\n", len, argv[i]); */
             }
         }
 
