@@ -1,1 +1,1 @@
-lib/Hiredis/Async/AnyEvent.pm
+lib/Hiredis/Async.pm
