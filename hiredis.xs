@@ -66,14 +66,12 @@ SV* redisReplyToSV(redisReply *reply){
 }
 
 void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
-    printf("redisConnectHandleCallback()\n");
     if (ac->err) {
         croak("Connect error: %s", ac->errstr);
     }
 }
 
 void redisDisconnectHandleCallback(const struct redisAsyncContext *ac, int status) {
-    printf("redisDisconnectHandleCallback()\n");
     if (ac->err) {
         croak("Disconnect error: %s", ac->errstr);
     }
@@ -96,7 +94,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     callback = c->callback;
 
     if(_reply == NULL) { /* we're shutting down or something */
-        printf("reply is null\n");
         if(c->argv_ok){
             Safefree(c->argv);
             c->argv_ok = 0;
@@ -113,7 +110,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
         Safefree(c);
 
         if (ac->err) {
-            printf("here %p\n", ac->data);
             redis_async_xs_unmagic(aTHX_ ac->data);
 
             croak("Command failed: %s", ac->errstr);
@@ -122,7 +118,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
         return;
     }
 
-    printf("reply is not null\n");
     result = redisReplyToSV(reply);
     dSP;
     ENTER;
@@ -170,7 +165,6 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
             croak("Failed to create async connection: %s", ac->errstr);
         }
 
-        printf("%p\n", self);
         xs_object_magic_attach_struct(aTHX_ SvRV(self), ac);
         ac->data = SvRV(self);
 
@@ -226,7 +220,6 @@ redisAsyncCommand(redisAsyncContext *ac, AV *args, SV *callback)
             if(elt != NULL){
                 argv[i] = SvPV(*elt, len);
                 arglen[i] = len;
-                /* printf("array element %d:%s,\n", len, argv[i]); */
             }
         }
 
