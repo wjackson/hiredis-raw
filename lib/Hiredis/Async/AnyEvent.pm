@@ -9,12 +9,12 @@ has 'redis' => (
     is         => 'ro',
     isa        => 'Hiredis::Async',
     lazy_build => 1,
-    handles    => {
-        GetFd       => 'GetFd',
-        HandleRead  => 'HandleRead',
-        HandleWrite => 'HandleWrite',
-        Command     => '_Command',
-    },
+    handles    => [qw(
+        GetFd
+        HandleRead
+        HandleWrite
+        Command
+    )],
 );
 
 has 'watchers' => (

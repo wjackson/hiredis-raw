@@ -174,7 +174,7 @@ redisAsyncIsAllocated(SV *self)
             PUSHs(&PL_sv_yes);
 
 redisErrorCode
-redisAsync_Command(redisAsyncContext *ac, AV *args, SV *callback)
+redisAsyncCommand(redisAsyncContext *ac, AV *args, SV *callback)
     PREINIT:
         int i;
         STRLEN len;
