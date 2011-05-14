@@ -21,7 +21,6 @@ $pkg->add_xs('hiredis.xs');
 $pkg->add_pm(
     './lib/Hiredis/Raw.pm'            => '$(INST_LIBDIR)/Raw.pm',
     './lib/Hiredis/Async.pm'          => '$(INST_LIBDIR)/Async.pm',
-    './lib/Hiredis/Async/AnyEvent.pm' => '$(INST_LIBDIR)/Async/AnyEvent.pm',
     './lib/Hiredis/Raw/Constants.pm'  => '$(INST_LIBDIR)/Raw/Constants.pm',
 );
 $pkg->add_typemaps('typemap');
@@ -42,13 +41,9 @@ configure_requires 'ExtUtils::Depends';
 configure_requires 'XS::Object::Magic';
 requires 'Sub::Exporter';
 requires 'XS::Object::Magic';
-test_requires 'AnyEvent';
 test_requires 'File::Which';
 test_requires 'Test::More';
 test_requires 'Test::Exception';
 test_requires 'Test::TCP';
-
-# NOTE: running Hiredis::Async::AnyEvent requires Moose,
-# namespace::autoclean, and AnyEvent.
 
 WriteAll;

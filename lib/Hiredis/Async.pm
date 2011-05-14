@@ -105,4 +105,4 @@ Jonathan Rockway C<< <jrockway@cpan.org> >>
 
 =head1 SEE ALSO
 
-L<Redis>, L<AnyEvent>, L<AnyEvent::Redis>
+L<Redis>, L<AnyEvent::Redis>
