@@ -20,15 +20,8 @@ typedef struct {
     unsigned int arglen_ok:1;
 } callbackContext;
 
-void redis_async_xs_unmagic (pTHX_ SV *thingy) {
-    SV* self = SvRV(thingy);
-    // sv_unmagic(self, PERL_MAGIC_ext);
-
-    MAGIC *mg = xs_object_magic_get_mg(aTHX_ self);
-    mg->mg_virtual = NULL;
-
-    // mg_clear(self);
-    // mg_free(self);
+void redis_async_xs_unmagic (pTHX_ SV *self) {
+    sv_unmagic(self,PERL_MAGIC_ext);
 }
 
 SV* redisReplyToSV(redisReply *reply){
