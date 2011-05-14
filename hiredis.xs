@@ -167,7 +167,7 @@ void
 redisAsyncIsAllocated(SV *self)
     PPCODE:
         void *s = xs_object_magic_get_struct(aTHX_ SvRV(self));
-        EXTEND(SP, 2);
+        EXTEND(SP, 1);
         if(s == NULL)
             PUSHs(&PL_sv_no);
         else
