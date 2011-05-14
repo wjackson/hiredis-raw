@@ -25,5 +25,10 @@ $done->recv;
 my $end = AnyEvent->now;
 
 say "\aIt took ". ($end - $start). " seconds";
-say " that is ". ($ii/($end - $start)). " per second"
+say " that is ". ($ii/($end - $start)). " per second";
+
+say 'The test is complete. Kill me to continue.';
+
+AnyEvent->condvar->recv;
+
 
