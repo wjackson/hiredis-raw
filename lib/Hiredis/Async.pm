@@ -88,11 +88,6 @@ may call callbacks if results are available.
 
 Write as many bytes to the Redis server as possible without blocking.
 
-=head1 BUGS
-
-Segfaults if the connection to the Redis server is interupted and you continue
-trying to use the object.
-
 =head1 REPOSITORY
 
 L<http://github.com/wjackson/hiredis-raw>
