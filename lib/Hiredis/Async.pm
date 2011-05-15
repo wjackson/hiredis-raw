@@ -57,7 +57,7 @@ The other commands deal with I/O to and from the server.  GetFd returns the
 socket that's connected to the server. You can use this fd to poll for
 readablity or writability with an event loop.  When this fd is readable, call
 HandleRead.  When the fd is writable and BufferLength returns a number greater
-than 0 call HandleWrite.  Note that if you don't check BufferLength and just
+than 0, call HandleWrite.  Note that if you don't check BufferLength and just
 call HandleWrite then your program will use 100% cpu.
 
 =head1 METHODS
@@ -68,16 +68,16 @@ Takes two mandatory arguments: host and port number.
 
 =head2 Command
 
-Takes an array ref representing a command to send to redis and calls a
+Takes an array ref representing a command to send to Redis and calls a
 callback with the result or error.
 
 =head2 BufferLength
 
-Returns the nubmer of bytes that need to be written to the Redis server.
+Returns the number of bytes that need to be written to the Redis server.
 
 =head2 GetFd
 
-Returns the file descriptor being used to communicatote with the Redis server.
+Returns the file descriptor being used to communicate with the Redis server.
 
 =head2 HandleRead
 
