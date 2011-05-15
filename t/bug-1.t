@@ -4,7 +4,6 @@ use Test::More;
 use Test::Exception;
 
 use Hiredis::Async;
-use AnyEvent;
 # use Devel::Peek;
 
 # Redis automatically frees the redis context causing major problems.  We make
