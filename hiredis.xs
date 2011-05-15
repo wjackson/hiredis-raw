@@ -7,18 +7,10 @@
 #include "hiredis.h"
 #include "async.h"
 
-typedef char *sds;
-
-struct sdshdr {
-    int len;
-    int free;
-    char buf[];
-};
-
-static inline size_t sdslen(const sds s) {
-    struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr)));
-    return sh->len;
-}
+typedef struct redisPerlEvents {
+    redisAsyncContext *context;
+    int hasBufferedWrites;
+} redisPerlEvents;
 
 typedef int redisErrorCode;
 
@@ -76,6 +68,22 @@ SV* redisReplyToSV(redisReply *reply){
     }
 
     return result;
+}
+
+void redisPerlDelWrite(void *privdata) {
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    e->hasBufferedWrites = 0;
+}
+
+void redisPerlAddWrite(void *privdata) {
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    e->hasBufferedWrites = 1;
+}
+
+void redisPerlCleanup(void *privdata) {
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    redisPerlDelWrite(privdata);
+    free(e);
 }
 
 void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
@@ -170,8 +178,27 @@ void
 redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
     PREINIT:
         redisAsyncContext *ac;
+        redisPerlEvents *e;
     CODE:
         ac = redisAsyncConnect(host, port);
+
+        /* Nothing should be attached when something is already attached */
+        if (ac->ev.data != NULL) {
+            croak("event callbacks are aready initialized");
+        }
+
+        e = (redisPerlEvents*)malloc(sizeof(*e));
+        e->context = ac;
+        e->hasBufferedWrites = 0;
+
+        /* Register functions to start/stop listening for events */
+        // ac->ev.addRead = redisPerlAddRead;
+        // ac->ev.delRead = redisPerlDelRead;
+        ac->ev.addWrite = redisPerlAddWrite;
+        ac->ev.delWrite = redisPerlDelWrite;
+        ac->ev.cleanup  = redisPerlCleanup;
+        ac->ev.data     = e;
+
         redisAsyncSetConnectCallback(ac, &redisConnectHandleCallback);
         redisAsyncSetDisconnectCallback(ac, &redisDisconnectHandleCallback);
         if (ac->err) {
@@ -183,6 +210,24 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
 
 void
 redisAsyncFree(redisAsyncContext *ac)
+
+void
+redisAsyncHasBufferedWrites(SV *self)
+    PPCODE:
+        redisPerlEvents *e;
+        redisAsyncContext *ac = xs_object_magic_get_struct(aTHX_ SvRV(self));
+        EXTEND(SP, 1);
+
+        if (ac == NULL) {
+            PUSHs(&PL_sv_no);
+        }
+        else {
+            e = (redisPerlEvents*)ac->ev.data;
+            if (e->hasBufferedWrites == 1)
+                PUSHs(&PL_sv_yes);
+            else
+                PUSHs(&PL_sv_no);
+        }
 
 void
 redisAsyncIsAllocated(SV *self)
@@ -243,13 +288,6 @@ redisAsyncCommand(redisAsyncContext *ac, AV *args, SV *callback)
         c->callback_ok = c->argv_ok = c->arglen_ok = 1;
 
         RETVAL = redisAsyncCommandArgv(ac, &redisAsyncHandleCallback, c, argc, (const char **) argv, arglen);
-    OUTPUT:
-        RETVAL
-
-int
-redisAsyncBufferLength(redisAsyncContext *ac)
-    CODE:
-        RETVAL = sdslen(ac->c.obuf);
     OUTPUT:
         RETVAL
 
