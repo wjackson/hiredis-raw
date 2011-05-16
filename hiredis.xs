@@ -83,7 +83,7 @@ void redisPerlAddWrite(void *privdata) {
 void redisPerlCleanup(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
     redisPerlDelWrite(privdata);
-    free(e);
+    Safefree(e);
 }
 
 void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
@@ -187,7 +187,10 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
             croak("event callbacks are aready initialized");
         }
 
-        e = (redisPerlEvents*)malloc(sizeof(*e));
+        Newx(e, 1, redisPerlEvents);
+        if(e == NULL)
+            croak("cannot allocate memory for redisEvents structure");
+
         e->context = ac;
         e->hasBufferedWrites = 0;
 
