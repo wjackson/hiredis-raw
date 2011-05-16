@@ -26,7 +26,7 @@ typedef struct {
 } callbackContext;
 
 void redis_async_xs_unmagic (pTHX_ SV *self) {
-    sv_unmagic(self,PERL_MAGIC_ext);
+    xs_object_magic_detach_struct(aTHX_ self);
 }
 
 SV* redisReplyToSV(redisReply *reply){
