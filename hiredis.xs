@@ -31,7 +31,7 @@ typedef struct {
 } callbackContext;
 
 void redis_async_xs_unmagic (pTHX_ SV *self) {
-    sv_unmagic(self,PERL_MAGIC_ext);
+    xs_object_magic_detach_struct(aTHX_ self);
 }
 
 SV* redisReplyToSV(redisReply *reply){
@@ -144,7 +144,7 @@ void redisPerlCleanup(void *privdata) {
         FREETMPS;
         LEAVE;
     }
-    free(e);
+    Safefree(e);
 }
 
 void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
@@ -248,7 +248,10 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *add
             croak("event callbacks are aready initialized");
         }
 
-        e = (redisPerlEvents*)malloc(sizeof(*e));
+        Newx(e, 1, redisPerlEvents);
+        if(e == NULL)
+            croak("cannot allocate memory for redisEvents structure");
+
         e->context  = ac;
         e->addRead  = newSVsv(addRead);
         e->delRead  = newSVsv(delRead);
