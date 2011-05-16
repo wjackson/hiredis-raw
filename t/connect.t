@@ -12,7 +12,7 @@ use t::Redis;
     # Connection problems are often not discovered until the first command is
     # executed. Here we test that they are noticed and reported properly.
 
-    my $redis = Hiredis::Async->new('127.0.0.1', 12345);
+    my $redis = Hiredis::Async->new(host => '127.0.0.1', port => 12345);
 
     cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
 

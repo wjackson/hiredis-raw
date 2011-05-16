@@ -9,7 +9,12 @@
 
 typedef struct redisPerlEvents {
     redisAsyncContext *context;
-    int hasBufferedWrites;
+
+    SV *addRead;
+    SV *delRead;
+    SV *addWrite;
+    SV *delWrite;
+    SV *cleanup;
 } redisPerlEvents;
 
 typedef int redisErrorCode;
@@ -70,19 +75,75 @@ SV* redisReplyToSV(redisReply *reply){
     return result;
 }
 
-void redisPerlDelWrite(void *privdata) {
+void redisPerlAddRead(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    e->hasBufferedWrites = 0;
+    if (SvOK(e->addRead)) {
+        dSP;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        PUTBACK;
+        Perl_call_sv(aTHX_ e->addRead, G_DISCARD);
+        FREETMPS;
+        LEAVE;
+    }
+}
+
+void redisPerlDelRead(void *privdata) {
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    if (SvOK(e->delRead)) {
+        dSP;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        PUTBACK;
+        Perl_call_sv(aTHX_ e->delRead, G_DISCARD);
+        FREETMPS;
+        LEAVE;
+    }
 }
 
 void redisPerlAddWrite(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    e->hasBufferedWrites = 1;
+    if (SvOK(e->addWrite)) {
+        dSP;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        PUTBACK;
+        Perl_call_sv(aTHX_ e->addWrite, G_DISCARD);
+        FREETMPS;
+        LEAVE;
+    }
 }
+
+void redisPerlDelWrite(void *privdata) {
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    if (SvOK(e->delWrite)) {
+        dSP;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        PUTBACK;
+        Perl_call_sv(aTHX_ e->delWrite, G_DISCARD);
+        FREETMPS;
+        LEAVE;
+    }
+}
+
 
 void redisPerlCleanup(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    redisPerlDelWrite(privdata);
+    if (SvOK(e->cleanup)) {
+        dSP;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        PUTBACK;
+        Perl_call_sv(aTHX_ e->cleanup, G_DISCARD);
+        FREETMPS;
+        LEAVE;
+    }
     free(e);
 }
 
@@ -175,7 +236,7 @@ MODULE = Hiredis::Raw  PACKAGE = Hiredis::Async  PREFIX = redisAsync
 PROTOTYPES: DISABLE
 
 void
-redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
+redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *addRead=NULL, SV *delRead=NULL, SV *addWrite=NULL, SV *delWrite=NULL, SV *cleanup=NULL)
     PREINIT:
         redisAsyncContext *ac;
         redisPerlEvents *e;
@@ -188,12 +249,16 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
         }
 
         e = (redisPerlEvents*)malloc(sizeof(*e));
-        e->context = ac;
-        e->hasBufferedWrites = 0;
+        e->context  = ac;
+        e->addRead  = newSVsv(addRead);
+        e->delRead  = newSVsv(delRead);
+        e->addWrite = newSVsv(addWrite);
+        e->delWrite = newSVsv(delWrite);
+        e->cleanup  = newSVsv(cleanup);
 
         /* Register functions to start/stop listening for events */
-        // ac->ev.addRead = redisPerlAddRead;
-        // ac->ev.delRead = redisPerlDelRead;
+        ac->ev.addRead  = redisPerlAddRead;
+        ac->ev.delRead  = redisPerlDelRead;
         ac->ev.addWrite = redisPerlAddWrite;
         ac->ev.delWrite = redisPerlDelWrite;
         ac->ev.cleanup  = redisPerlCleanup;
@@ -210,24 +275,6 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379)
 
 void
 redisAsyncFree(redisAsyncContext *ac)
-
-void
-redisAsyncHasBufferedWrites(SV *self)
-    PPCODE:
-        redisPerlEvents *e;
-        redisAsyncContext *ac = xs_object_magic_get_struct(aTHX_ SvRV(self));
-        EXTEND(SP, 1);
-
-        if (ac == NULL) {
-            PUSHs(&PL_sv_no);
-        }
-        else {
-            e = (redisPerlEvents*)ac->ev.data;
-            if (e->hasBufferedWrites == 1)
-                PUSHs(&PL_sv_yes);
-            else
-                PUSHs(&PL_sv_no);
-        }
 
 void
 redisAsyncIsAllocated(SV *self)
