@@ -115,7 +115,9 @@ Takes the following named arguments:
 
 =back
 
-The remaining arguments are callbacks used to handle various hiredis events.
+The remaining constructor arguments are callbacks used to handle various
+hiredis events.  They're all passed the Redis connection file descriptor as
+their one and only argument except cleanup which is passed nothing.
 
 =over4
 
@@ -126,9 +128,6 @@ Start the read watcher.
 =item delRead
 
 Stop the read watcher.
-
-Note that this is currently never called by hiredis.  We include it here for
-completeness.
 
 =item addWrite
 
