@@ -148,6 +148,7 @@ void redisPerlCleanup(void *privdata) {
         FREETMPS;
         LEAVE;
     }
+    redisPerlDelRead(privdata);
     redisPerlDelWrite(privdata);
     Safefree(e);
 }
