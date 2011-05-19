@@ -153,12 +153,14 @@ void redisPerlCleanup(void *privdata) {
 
 void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
     if (ac->err) {
+        redisPerlCleanup(ac->ev.data);
         croak("Connect error: %s", ac->errstr);
     }
 }
 
 void redisDisconnectHandleCallback(const struct redisAsyncContext *ac, int status) {
     if (ac->err) {
+        redisPerlCleanup(ac->ev.data);
         croak("Disconnect error: %s", ac->errstr);
     }
 }
@@ -196,8 +198,8 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
         Safefree(c);
 
         if (ac->err) {
+            redisPerlCleanup(ac->ev.data);
             redis_async_xs_unmagic(aTHX_ ac->data);
-
             croak("Command failed: %s", ac->errstr);
         }
 
@@ -274,6 +276,7 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *add
         redisAsyncSetConnectCallback(ac, &redisConnectHandleCallback);
         redisAsyncSetDisconnectCallback(ac, &redisDisconnectHandleCallback);
         if (ac->err) {
+            redisPerlCleanup(e);
             croak("Failed to create async connection: %s", ac->errstr);
         }
 
