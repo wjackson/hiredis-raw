@@ -148,6 +148,7 @@ void redisPerlCleanup(void *privdata) {
         FREETMPS;
         LEAVE;
     }
+    redisPerlDelWrite(privdata);
     Safefree(e);
 }
 
@@ -255,8 +256,9 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *add
         }
 
         Newx(e, 1, redisPerlEvents);
-        if(e == NULL)
+        if(e == NULL) {
             croak("cannot allocate memory for redisEvents structure");
+        }
 
         e->context  = ac;
         e->addRead  = newSVsv(addRead);
