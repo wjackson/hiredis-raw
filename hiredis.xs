@@ -82,6 +82,7 @@ void redisPerlAddRead(void *privdata) {
         ENTER;
         SAVETMPS;
         PUSHMARK(SP);
+        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
         PUTBACK;
         Perl_call_sv(aTHX_ e->addRead, G_DISCARD);
         FREETMPS;
@@ -96,6 +97,7 @@ void redisPerlDelRead(void *privdata) {
         ENTER;
         SAVETMPS;
         PUSHMARK(SP);
+        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
         PUTBACK;
         Perl_call_sv(aTHX_ e->delRead, G_DISCARD);
         FREETMPS;
@@ -110,6 +112,7 @@ void redisPerlAddWrite(void *privdata) {
         ENTER;
         SAVETMPS;
         PUSHMARK(SP);
+        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
         PUTBACK;
         Perl_call_sv(aTHX_ e->addWrite, G_DISCARD);
         FREETMPS;
@@ -124,6 +127,7 @@ void redisPerlDelWrite(void *privdata) {
         ENTER;
         SAVETMPS;
         PUSHMARK(SP);
+        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
         PUTBACK;
         Perl_call_sv(aTHX_ e->delWrite, G_DISCARD);
         FREETMPS;
