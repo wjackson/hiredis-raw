@@ -117,7 +117,7 @@ Takes the following named arguments:
 
 The remaining constructor arguments are callbacks used to handle various
 hiredis events.  They're all passed the Redis connection file descriptor as
-their one and only argument except cleanup which is passed nothing.
+their one and only argument.
 
 =over4
 

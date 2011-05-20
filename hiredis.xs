@@ -75,81 +75,48 @@ SV* redisReplyToSV(redisReply *reply){
     return result;
 }
 
-void redisPerlAddRead(void *privdata) {
-    redisPerlEvents *e = (redisPerlEvents*)privdata;
-    if (SvOK(e->addRead)) {
+void redisPerlCallback(redisPerlEvents *e, SV* callback) {
+    int fd = (int)e->context->c.fd;
+    if (SvOK(callback)) {
         dSP;
         ENTER;
         SAVETMPS;
         PUSHMARK(SP);
-        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
+        XPUSHs(sv_2mortal(newSViv(fd)));
         PUTBACK;
-        Perl_call_sv(aTHX_ e->addRead, G_DISCARD);
+        Perl_call_sv(aTHX_ callback, G_DISCARD);
         FREETMPS;
         LEAVE;
     }
+}
+
+void redisPerlAddRead(void *privdata) {
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    redisPerlCallback(e, e->addRead);
 }
 
 void redisPerlDelRead(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    if (SvOK(e->delRead)) {
-        dSP;
-        ENTER;
-        SAVETMPS;
-        PUSHMARK(SP);
-        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
-        PUTBACK;
-        Perl_call_sv(aTHX_ e->delRead, G_DISCARD);
-        FREETMPS;
-        LEAVE;
-    }
+    redisPerlCallback(e, e->delRead);
 }
 
 void redisPerlAddWrite(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    if (SvOK(e->addWrite)) {
-        dSP;
-        ENTER;
-        SAVETMPS;
-        PUSHMARK(SP);
-        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
-        PUTBACK;
-        Perl_call_sv(aTHX_ e->addWrite, G_DISCARD);
-        FREETMPS;
-        LEAVE;
-    }
+    redisPerlCallback(e, e->addWrite);
 }
 
 void redisPerlDelWrite(void *privdata) {
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    if (SvOK(e->delWrite)) {
-        dSP;
-        ENTER;
-        SAVETMPS;
-        PUSHMARK(SP);
-        XPUSHs(sv_2mortal(newSViv(e->context->c.fd)));
-        PUTBACK;
-        Perl_call_sv(aTHX_ e->delWrite, G_DISCARD);
-        FREETMPS;
-        LEAVE;
-    }
+    redisPerlCallback(e, e->delWrite);
 }
 
-
 void redisPerlCleanup(void *privdata) {
-    redisPerlEvents *e = (redisPerlEvents*)privdata;
-    if (SvOK(e->cleanup)) {
-        dSP;
-        ENTER;
-        SAVETMPS;
-        PUSHMARK(SP);
-        PUTBACK;
-        Perl_call_sv(aTHX_ e->cleanup, G_DISCARD);
-        FREETMPS;
-        LEAVE;
-    }
     redisPerlDelRead(privdata);
     redisPerlDelWrite(privdata);
+
+    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    redisPerlCallback(e, e->cleanup);
+
     Safefree(e);
 }
 
