@@ -206,12 +206,16 @@ MODULE = Hiredis::Raw  PACKAGE = Hiredis::Async  PREFIX = redisAsync
 PROTOTYPES: DISABLE
 
 void
-redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *addRead=NULL, SV *delRead=NULL, SV *addWrite=NULL, SV *delWrite=NULL, SV *cleanup=NULL)
+redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *addRead=NULL, SV *delRead=NULL, SV *addWrite=NULL, SV *delWrite=NULL)
     PREINIT:
         redisAsyncContext *ac;
         redisPerlEvents *e;
     CODE:
         ac = redisAsyncConnect(host, port);
+
+        if (ac->err) {
+            croak("Failed to create async connection: %s", ac->errstr);
+        }
 
         /* Nothing should be attached when something is already attached */
         if (ac->ev.data != NULL) {
@@ -239,10 +243,6 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *add
 
         redisAsyncSetConnectCallback(ac, &redisConnectHandleCallback);
         redisAsyncSetDisconnectCallback(ac, &redisDisconnectHandleCallback);
-        if (ac->err) {
-            redisPerlCleanup(e);
-            croak("Failed to create async connection: %s", ac->errstr);
-        }
 
         xs_object_magic_attach_struct(aTHX_ SvRV(self), ac);
         ac->data = SvRV(self);
