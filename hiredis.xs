@@ -111,12 +111,7 @@ void redisPerlDelWrite(void *privdata) {
 }
 
 void redisPerlCleanup(void *privdata) {
-    redisPerlDelRead(privdata);
-    redisPerlDelWrite(privdata);
-
     redisPerlEvents *e = (redisPerlEvents*)privdata;
-    redisPerlCallback(e, e->cleanup);
-
     Safefree(e);
 }
 
@@ -233,7 +228,6 @@ redisAsyncConnect(SV *self, const char *host="localhost", int port=6379, SV *add
         e->delRead  = newSVsv(delRead);
         e->addWrite = newSVsv(addWrite);
         e->delWrite = newSVsv(delWrite);
-        e->cleanup  = newSVsv(cleanup);
 
         /* Register functions to start/stop listening for events */
         ac->ev.addRead  = redisPerlAddRead;

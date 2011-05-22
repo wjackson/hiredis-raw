@@ -10,7 +10,6 @@ use t::Redis;
 test_redis {
     my $port = shift;
 
-    my $cleanup_cnt      = 0;
     my $write_watcher_on = 0;
     my $read_watcher_on  = 0;
 
@@ -22,7 +21,6 @@ test_redis {
         delRead  => sub { $read_watcher_on  = 0 },
         addWrite => sub { $write_watcher_on = 1 },
         delWrite => sub { $write_watcher_on = 0 },
-        cleanup  => sub { $cleanup_cnt++   },
     );
 
     cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
@@ -61,11 +59,7 @@ test_redis {
 
     ok !$write_watcher_on, 'no new commands';
 
-    ok !$cleanup_cnt, 'no cleanup yet';
-
     $redis = undef;
-
-    ok $cleanup_cnt, 'cleanup happened';
 };
 
 done_testing;

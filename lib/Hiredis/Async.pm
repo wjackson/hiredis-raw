@@ -15,7 +15,6 @@ sub new {
         $connect_args{delRead},
         $connect_args{addWrite},
         $connect_args{delWrite},
-        $connect_args{cleanup},
     );
 
     return $self;
@@ -49,7 +48,6 @@ Hiredis::Async - Perl binding for asychronous hiredis API
       delRead  => sub { # delete read event watcher  },
       addWrite => sub { # add write event watcher    },
       delWrite => sub { # delete write event watcher },
-      cleanup  => sub { # perform cleanup operations },
   );
 
   $redis->Command(['PING'], sub {
@@ -102,7 +100,6 @@ Example:
       delRead  => sub { # delete read event watcher  },
       addWrite => sub { # add write event watcher    },
       delWrite => sub { # delete write event watcher },
-      cleanup  => sub { # perform cleanup operations },
   );
 
 Takes the following named arguments:
@@ -136,12 +133,6 @@ Start the write watcher.
 =item delRead
 
 Stop the write watcher.
-
-=item cleanup
-
-Hiredis is about to cleanup.
-
-=back
 
 =head2 Command
 
