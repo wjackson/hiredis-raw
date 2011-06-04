@@ -181,7 +181,7 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     }
     else {
         XPUSHs(result);
-        XPUSHs(&PL_sv_yes);
+        XPUSHs(&PL_sv_undef);
     }
     PUTBACK;
 
