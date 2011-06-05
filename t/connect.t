@@ -16,19 +16,20 @@ use t::Redis;
 
     cmp_ok my $fd = $redis->GetFd, '>', 0, 'got fd';
 
-    my $pong;
-    $redis->Command(['PING'], sub { $pong = $_[0] } );
+    my ($ping_res, $ping_err);
+    $redis->Command(['PING'], sub { ($ping_res, $ping_err) = @_ } );
 
     my $select = IO::Select->new($fd);
     $select->can_write;
 
-    throws_ok { $redis->HandleWrite } qr/Connection refused/, 'bad port';
+    $redis->HandleWrite;
+
+    is $ping_res, undef, 'no PONG from PING';
+    like $ping_err, qr/Connection refused/, 'connection error';
 
     $select->can_read;
     throws_ok { $redis->HandleRead } qr/does not have a struct/, 
         'read after connection failure is invalid';
-
-    is $pong, undef, 'no PONG from PING';
 };
 
 done_testing;

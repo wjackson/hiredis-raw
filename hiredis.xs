@@ -111,22 +111,18 @@ void redisPerlDelWrite(void *privdata) {
 }
 
 void redisPerlCleanup(void *privdata) {
-    redisPerlEvents *e = (redisPerlEvents*)privdata;
+    redisPerlEvents *e    = (redisPerlEvents*)privdata;
+    redisAsyncContext *ac = e->context;
+    void *self            = ac->data;
+
+    redis_async_xs_unmagic(aTHX_ self);
     Safefree(e);
 }
 
 void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
-    if (ac->err) {
-        redisPerlCleanup(ac->ev.data);
-        croak("Connect error: %s", ac->errstr);
-    }
 }
 
 void redisDisconnectHandleCallback(const struct redisAsyncContext *ac, int status) {
-    if (ac->err) {
-        redisPerlCleanup(ac->ev.data);
-        croak("Disconnect error: %s", ac->errstr);
-    }
 }
 
 void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privdata){
@@ -140,48 +136,34 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
         croak("OH NOES!  Null privdata passed to redisAsyncHandleCallback!");
     }
 
-    reply = _reply;
-    c = _privdata;
-    my_perl = c->my_perl;
+    reply    = _reply;
+    c        = _privdata;
+    my_perl  = c->my_perl;
     callback = c->callback;
 
-    if(_reply == NULL) { /* we're shutting down or something */
-        if(c->argv_ok){
-            Safefree(c->argv);
-            c->argv_ok = 0;
-        }
-
-        if(c->arglen_ok){
-            Safefree(c->arglen);
-            c->arglen_ok = 0;
-        }
-
-        SvREFCNT_dec(callback);
-        c->callback_ok = 0;
-
-        Safefree(c);
-
-        if (ac->err) {
-            redisPerlCleanup(ac->ev.data);
-            redis_async_xs_unmagic(aTHX_ ac->data);
-            croak("Command failed: %s", ac->errstr);
-        }
-
-        return;
-    }
-
-    result = redisReplyToSV(reply);
     dSP;
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if(reply->type == REDIS_REPLY_ERROR){ /* is success? */
+    if (reply == NULL) {
         XPUSHs(&PL_sv_undef);
-        XPUSHs(result);
+        if (ac->err) {
+            XPUSHs(sv_2mortal(newSVpv(ac->errstr, 0)));
+        }
+        else {
+            XPUSHs(sv_2mortal(newSVpv("Command failed: NULL reply", 0)));
+        }
     }
     else {
-        XPUSHs(result);
-        XPUSHs(&PL_sv_undef);
+        result = redisReplyToSV(reply);
+        if(reply->type == REDIS_REPLY_ERROR){ /* is success? */
+            XPUSHs(&PL_sv_undef);
+            XPUSHs(result);
+        }
+        else {
+            XPUSHs(result);
+            XPUSHs(&PL_sv_undef);
+        }
     }
     PUTBACK;
 
