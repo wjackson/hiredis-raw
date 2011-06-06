@@ -30,8 +30,8 @@ typedef struct {
     unsigned int arglen_ok:1;
 } callbackContext;
 
-void redis_async_xs_unmagic (pTHX_ SV *self) {
-    xs_object_magic_detach_struct(aTHX_ self);
+void redis_async_xs_unmagic (pTHX_ SV *self, redisAsyncContext *ac) {
+    xs_object_magic_detach_struct(aTHX_ self, (void *) ac);
 }
 
 SV* redisReplyToSV(redisReply *reply){
@@ -115,7 +115,7 @@ void redisPerlCleanup(void *privdata) {
     redisAsyncContext *ac = e->context;
     void *self            = ac->data;
 
-    redis_async_xs_unmagic(aTHX_ self);
+    redis_async_xs_unmagic(aTHX_ self, ac);
     Safefree(e);
 }
 
