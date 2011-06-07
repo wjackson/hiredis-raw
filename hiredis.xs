@@ -130,7 +130,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     callbackContext *c;
     redisReply *reply;
     SV *callback;
-    PerlInterpreter *my_perl;
 
     if(_privdata == NULL) {
         croak("OH NOES!  Null privdata passed to redisAsyncHandleCallback!");
@@ -138,7 +137,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
 
     reply    = _reply;
     c        = _privdata;
-    my_perl  = c->my_perl;
     callback = c->callback;
 
     dSP;
