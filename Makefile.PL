@@ -6,16 +6,21 @@ use ExtUtils::Depends;
 mkdir 'build';
 my $pkg = ExtUtils::Depends->new( 'Hiredis::Raw', 'XS::Object::Magic' );
 
-my $hiredis_prefix  = $ENV{HIREDIS_PREFIX} || '/usr/local';
+my $hiredis_prefix
+    = defined $ENV{HIREDIS_PREFIX}    ? $ENV{HIREDIS_PREFIX}
+    : -d '/usr/local/include/hiredis' ? '/usr/local'
+    : -d '/usr/include/hiredis'       ? '/usr'
+    :                                   '/usr/local'
+    ;
 my $hiredis_include = "$hiredis_prefix/include/hiredis";
 
 if (!-d $hiredis_include) {
     warn qq{*** the include dir '$hiredis_include' wasn't found.  You may }
        .  q{need to install hiredis or set the HIREDIS_PREFIX environment }
-       .  q{variable the location of your hiredis install};
+       .  q{variable to the location of your hiredis install};
 }
 
-$pkg->set_inc("-I$hiredis_prefix/include/hiredis");
+$pkg->set_inc("-I$hiredis_include");
 $pkg->set_libs("-L$hiredis_prefix/lib -lhiredis");
 $pkg->add_xs('hiredis.xs');
 $pkg->add_pm(
