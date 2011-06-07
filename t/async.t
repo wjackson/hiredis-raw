@@ -34,14 +34,14 @@ test_redis {
     ok !$write_watcher_on, 'finished post connect write';
     ok $read_watcher_on,   'read results';
 
-    my ($z_res, $z_err);
     my @l_errs;
     my @values;
     my $pong;
     my $error;
+    my $info_str;
 
     $redis->Command(['PING'],                  sub { $pong = $_[0] });
-    $redis->Command([qw/ZADD zkey 0 v1 0 v2/], sub { ($z_res, $z_err) = @_ });
+    $redis->Command(['INFO'],                  sub { $info_str = $_[0] });
     $redis->Command([qw/LPUSH key value/],     sub { push @l_errs, $_[1] })
         for 1..3;
     $redis->Command([qw/LRANGE key 0 2/],      sub { @values = @{$_[0]} });
@@ -58,15 +58,31 @@ test_redis {
     ok $read_watcher_on, 'always be reading';
 
     is $pong, 'PONG', 'got PONG from PING';
-    is $z_res, 2, '2 zadds occured';
-    is $z_err, undef, 'no error from zadd';
     is_deeply \@l_errs, [undef, undef, undef], 'no errors from lpush';
     is_deeply \@values, [qw/value value value/], 'got values';
     is $error, q{ERR unknown command 'BOGUS'}, 'got error';
 
+    # parse the info line;
+    my $info = { map { split /:/ } grep { /:/ } split /\r\n/, $info_str };
+    ok exists $info->{redis_version}, 'got info';
+
     ok !$write_watcher_on, 'no new commands';
 
-    $redis = undef;
+    # variadic zset command
+    if ($info->{redis_version} gt '2.4') {
+
+        my ($z_res, $z_err);
+        $redis->Command([qw/ZADD zkey 0 v1 0 v2/], sub { ($z_res, $z_err) = @_ });
+
+        $select->can_write;
+        $redis->HandleWrite;
+
+        $select->can_read;
+        $redis->HandleRead;
+
+        is $z_res, 2, '2 zadds occured';
+        is $z_err, undef, 'no error from zadd';
+    }
 };
 
 done_testing;
