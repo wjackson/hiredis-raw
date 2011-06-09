@@ -104,7 +104,7 @@ Example:
 
 Takes the following named arguments:
 
-=over4
+=over 4
 
 =item host
 
@@ -116,7 +116,7 @@ The remaining constructor arguments are callbacks used to handle various
 hiredis events.  They're all passed the Redis connection file descriptor as
 their one and only argument.
 
-=over4
+=over 4
 
 =item addRead
 
@@ -133,6 +133,8 @@ Start the write watcher.
 =item delRead
 
 Stop the write watcher.
+
+=back
 
 =head2 Command
 
