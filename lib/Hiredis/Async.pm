@@ -152,6 +152,10 @@ may call callbacks if results are available.
 
 Write as many bytes to the Redis server as possible without blocking.
 
+=head1 SEE ALSO
+
+L<Redis>, L<AnyEvent::Redis>
+
 =head1 REPOSITORY
 
 L<http://github.com/wjackson/hiredis-raw>
@@ -162,6 +166,10 @@ Whitney Jackson C<< <whitney@cpan.org> >>
 
 Jonathan Rockway C<< <jrockway@cpan.org> >>
 
-=head1 SEE ALSO
+=head1 COPYRIGHT & LICENSE
 
-L<Redis>, L<AnyEvent::Redis>
+    Copyright (c) 2011 Whitney Jackson, Jonathan Rockway. All rights reserved
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+=cut

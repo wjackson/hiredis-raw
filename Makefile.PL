@@ -38,9 +38,11 @@ makemaker_args(
 );
 
 name 'Hiredis-Raw';
-license 'BSD3';
+license 'Perl_5';
+perl_version '5.010';
 all_from 'lib/Hiredis/Raw.pm';
 ppport;
+
 
 configure_requires 'ExtUtils::Depends';
 configure_requires 'XS::Object::Magic' => '0.0301';
