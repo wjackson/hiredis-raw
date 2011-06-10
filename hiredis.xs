@@ -46,11 +46,11 @@ SV* redisReplyToSV(redisReply *reply){
             case REDIS_REPLY_STATUS:
             case REDIS_REPLY_STRING:
             case REDIS_REPLY_ERROR:
-                result = sv_2mortal(newSVpvn(reply->str, reply->len));
+                result = newSVpvn(reply->str, reply->len);
                 break;
 
             case REDIS_REPLY_INTEGER:
-                result = sv_2mortal(newSViv(reply->integer));
+                result = newSViv(reply->integer);
                 break;
 
             case REDIS_REPLY_ARRAY:
@@ -61,7 +61,7 @@ SV* redisReplyToSV(redisReply *reply){
                     av_push(array, result);
                     result = NULL;
                 }
-                result = sv_2mortal(newRV_inc((SV *)array));
+                result = newRV_inc((SV *)array);
                 break;
 
             default:
