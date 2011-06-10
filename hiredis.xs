@@ -2,6 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #include <errno.h>
+#define NEED_sv_2pv_flags
 #include "ppport.h"
 #include <xs_object_magic.h>
 #include "hiredis.h"
@@ -84,7 +85,7 @@ void redisPerlCallback(redisPerlEvents *e, SV* callback) {
         PUSHMARK(SP);
         XPUSHs(sv_2mortal(newSViv(fd)));
         PUTBACK;
-        Perl_call_sv(aTHX_ callback, G_DISCARD);
+        call_sv(callback, G_DISCARD);
         FREETMPS;
         LEAVE;
     }
@@ -165,7 +166,7 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     }
     PUTBACK;
 
-    Perl_call_sv(aTHX_ callback, G_DISCARD);
+    call_sv(callback, G_DISCARD);
 
     FREETMPS;
     LEAVE;
