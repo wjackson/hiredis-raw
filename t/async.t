@@ -34,18 +34,20 @@ test_redis {
     ok !$write_watcher_on, 'finished post connect write';
     ok $read_watcher_on,   'read results';
 
+    my $pong;
     my @l_errs;
     my @values;
-    my $pong;
+    my $zrank;
     my $error;
     my $info_str;
 
-    $redis->Command(['PING'],                  sub { $pong = $_[0] });
-    $redis->Command(['INFO'],                  sub { $info_str = $_[0] });
-    $redis->Command([qw/LPUSH key value/],     sub { push @l_errs, $_[1] })
+    $redis->Command(['PING'],                    sub { $pong = $_[0] });
+    $redis->Command(['INFO'],                    sub { $info_str = $_[0] });
+    $redis->Command([qw/LPUSH key value/],       sub { push @l_errs, $_[1] })
         for 1..3;
-    $redis->Command([qw/LRANGE key 0 2/],      sub { @values = @{$_[0]} });
-    $redis->Command([qw/BOGUS/],               sub { $error = $_[1] });
+    $redis->Command([qw/LRANGE key 0 2/],        sub { @values = @{$_[0]} });
+    $redis->Command([qw/ZRANK zempty not_here/], sub { $zrank = $_[0] });
+    $redis->Command([qw/BOGUS/],                 sub { $error = $_[1] });
     ok $write_watcher_on, 'commands are buffered';
 
     $select->can_write;
@@ -58,6 +60,7 @@ test_redis {
     ok $read_watcher_on, 'always be reading';
 
     is $pong, 'PONG', 'got PONG from PING';
+    is $zrank, undef, 'nil zrank';
     is_deeply \@l_errs, [undef, undef, undef], 'no errors from lpush';
     is_deeply \@values, [qw/value value value/], 'got values';
     is $error, q{ERR unknown command 'BOGUS'}, 'got error';
