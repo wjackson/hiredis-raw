@@ -69,19 +69,22 @@ Hiredis::Async - Perl binding for asychronous hiredis API
 =head1 DESCRIPTION
 
 C<Hiredis::Async> contains Perl bindings for the asynchronous features of the
-hiredis C library (L<https://github.com/antirez/hiredis>).
+hiredis C library (L<https://github.com/antirez/hiredis>).  Its intended
+purpose is to allow event loops to easily take advantage of the hiredis async
+features.  If you just want to use these features and don't care about event
+loop integration you should check out <AnyEvent::Hiredis> instead.
 
-The main entry point c<Command> is how you interact with the Redis server.  It
+The main entry point C<Command> is how you interact with the Redis server.  It
 takes two arguments: an array ref containing the Redis command and its
 arguments, and a callback to call with the reply when it has arrived.
 
 The other commands deal with I/O to and from the server.  GetFd returns the
 socket that's connected to the server. You can use this fd to poll for
 readablity or writability with an event loop.  When this fd is readable, call
-HandleRead.  When the fd is writable and there are hiredis indicates there are
-writes to perform, call HandleWrite.  Note under normal circumstances the fd
-will be writable most of the time. So it's important to enable the callback
-only when there are outstanding writes.  Otherwise your program will use 100%
+HandleRead.  When the fd is writable and hiredis indicates there are writes to
+perform, call HandleWrite.  Note that under normal circumstances the fd will
+be writable most of the time. So it's important to enable the callback only
+when there are outstanding writes.  Otherwise your program will use 100% CPU
 even when idle.  Use the available callbacks to determine when there are
 outstanding writes.
 
@@ -156,7 +159,7 @@ Write as many bytes to the Redis server as possible without blocking.
 
 =head1 SEE ALSO
 
-L<Redis>, L<AnyEvent::Redis>
+L<AnyEvent::Hiredis>, L<Redis>, L<AnyEvent::Redis>
 
 =head1 REPOSITORY
 
