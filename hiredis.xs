@@ -139,11 +139,16 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     c        = _privdata;
     callback = c->callback;
 
+    Safefree(c->argv);
+    Safefree(c->arglen);
+    Safefree(c);
+
     dSP;
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
     if (reply == NULL) {
+        result = &PL_sv_undef;
         XPUSHs(&PL_sv_undef);
         if (ac->err) {
             XPUSHs(sv_2mortal(newSVpv(ac->errstr, 0)));
@@ -169,6 +174,9 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
 
     FREETMPS;
     LEAVE;
+
+    SvREFCNT_dec(callback);
+    SvREFCNT_dec(result);
 }
 
 MODULE = Hiredis::Raw	PACKAGE = Hiredis::Raw   PREFIX = redis
