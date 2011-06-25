@@ -24,7 +24,6 @@ typedef struct {
     SV *callback;
     char **argv;
     size_t *arglen;
-    PerlInterpreter *my_perl;
 
     unsigned int callback_ok:1;
     unsigned int argv_ok:1;
@@ -283,7 +282,6 @@ redisAsyncCommand(redisAsyncContext *ac, AV *args, SV *callback)
             }
         }
 
-        c->my_perl  = PERL_GET_CONTEXT;
         c->callback = SvREFCNT_inc_simple(callback);
         c->argv     = argv;
         c->arglen   = arglen;
