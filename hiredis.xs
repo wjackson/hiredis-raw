@@ -2,6 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #include <errno.h>
+#define NEED_sv_2pv_flags
 #include "ppport.h"
 #include <xs_object_magic.h>
 #include "hiredis.h"
@@ -45,11 +46,11 @@ SV* redisReplyToSV(redisReply *reply){
             case REDIS_REPLY_STATUS:
             case REDIS_REPLY_STRING:
             case REDIS_REPLY_ERROR:
-                result = sv_2mortal(newSVpvn(reply->str, reply->len));
+                result = newSVpvn(reply->str, reply->len);
                 break;
 
             case REDIS_REPLY_INTEGER:
-                result = sv_2mortal(newSViv(reply->integer));
+                result = newSViv(reply->integer);
                 break;
 
             case REDIS_REPLY_ARRAY:
@@ -60,7 +61,7 @@ SV* redisReplyToSV(redisReply *reply){
                     av_push(array, result);
                     result = NULL;
                 }
-                result = sv_2mortal(newRV_inc((SV *)array));
+                result = newRV_inc((SV *)array);
                 break;
 
             default:
@@ -84,7 +85,7 @@ void redisPerlCallback(redisPerlEvents *e, SV* callback) {
         PUSHMARK(SP);
         XPUSHs(sv_2mortal(newSViv(fd)));
         PUTBACK;
-        Perl_call_sv(aTHX_ callback, G_DISCARD);
+        call_sv(callback, G_DISCARD);
         FREETMPS;
         LEAVE;
     }
@@ -165,7 +166,7 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     }
     PUTBACK;
 
-    Perl_call_sv(aTHX_ callback, G_DISCARD);
+    call_sv(callback, G_DISCARD);
 
     FREETMPS;
     LEAVE;
