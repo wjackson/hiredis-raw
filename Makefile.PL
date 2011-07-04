@@ -12,6 +12,7 @@ my $hiredis_prefix
     : -d '/usr/include/hiredis'       ? '/usr'
     :                                   '/usr/local'
     ;
+my $hiredis_lib     = "$hiredis_prefix/lib";
 my $hiredis_include = "$hiredis_prefix/include/hiredis";
 
 if (!-d $hiredis_include) {
@@ -19,6 +20,13 @@ if (!-d $hiredis_include) {
        .  q{need to install hiredis or set the HIREDIS_PREFIX environment }
        .  q{variable to the location of your hiredis install};
 }
+
+checklibs(
+    libpath => $hiredis_lib,
+    incpath => $hiredis_include,
+    lib     => 'hiredis',
+    header  => 'hiredis.h',
+);
 
 $pkg->set_inc("-I$hiredis_include");
 $pkg->set_libs("-L$hiredis_prefix/lib -lhiredis");
