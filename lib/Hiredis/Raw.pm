@@ -4,7 +4,7 @@ use warnings;
 use XSLoader;
 use XS::Object::Magic;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 XSLoader::load('Hiredis::Raw', $VERSION);
 

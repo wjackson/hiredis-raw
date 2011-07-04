@@ -53,7 +53,7 @@ ppport;
 
 
 configure_requires 'ExtUtils::Depends';
-configure_requires 'XS::Object::Magic' => '0.0301';
+configure_requires 'XS::Object::Magic' => '0.04';
 requires 'Sub::Exporter';
 requires 'XS::Object::Magic';
 test_requires 'File::Which';
