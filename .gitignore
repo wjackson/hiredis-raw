@@ -10,3 +10,5 @@
 /pm_to_blib
 /build
 *.swp
+MANIFEST
+Hiredis-Raw-*.tar.gz
