@@ -9,9 +9,10 @@ use ok 'Hiredis::Raw';
 my @version = Hiredis::Raw::Version();
 is scalar @version,  3, 'got major/minor/patch';
 
-throws_ok {
-    Hiredis::Async->new(host => 'does-not-exist.example.com', port => 12345);
-} qr/Can't resolve:/, q{dies when we can't resolve the host to connect to};
+throws_ok
+    { Hiredis::Async->new(host => 'does-not-exist.example.com', port => 12345) }
+    qr/Failed to create async connection:/,
+    q{dies when we can't resolve the host to connect to};
 
 lives_ok {
     Hiredis::Async->new(host => 'localhost', port => 12345)

@@ -119,7 +119,7 @@ void redisPerlCleanup(void *privdata) {
     Safefree(e);
 }
 
-void redisConnectHandleCallback(const struct redisAsyncContext *ac) {
+void redisConnectHandleCallback(const struct redisAsyncContext *ac, int status) {
 }
 
 void redisDisconnectHandleCallback(const struct redisAsyncContext *ac, int status) {
