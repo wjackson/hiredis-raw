@@ -60,7 +60,8 @@ SV* redisReplyToSV(redisReply *reply){
                     av_push(array, result);
                     result = NULL;
                 }
-                result = newRV_inc((SV *)array);
+                result = newRV_noinc((SV *)array);
+
                 break;
 
             default:
