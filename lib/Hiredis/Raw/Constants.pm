@@ -1,4 +1,7 @@
 package Hiredis::Raw::Constants;
+BEGIN {
+    $Hiredis::Raw::Constants::VERSION = '0.04';
+}
 use strict;
 use warnings;
 
@@ -48,41 +51,41 @@ Hiredis::Raw::Constants
 
 =head1 CONSTANTS
 
-=head2 REDIS_ERR           
+=head2 REDIS_ERR
 
-=head2 REDIS_OK 
+=head2 REDIS_OK
 
-=head2 REDIS_ERR_IO        
+=head2 REDIS_ERR_IO
 
-=head2 REDIS_ERR_EOF       
+=head2 REDIS_ERR_EOF
 
-=head2 REDIS_ERR_PROTOCOL  
+=head2 REDIS_ERR_PROTOCOL
 
-=head2 REDIS_ERR_OTHER     
+=head2 REDIS_ERR_OTHER
 
-=head2 REDIS_BLOCK         
+=head2 REDIS_BLOCK
 
-=head2 REDIS_CONNECTED     
+=head2 REDIS_CONNECTED
 
-=head2 REDIS_DISCONNECTING 
+=head2 REDIS_DISCONNECTING
 
-=head2 REDIS_FREEING       
+=head2 REDIS_FREEING
 
-=head2 REDIS_IN_CALLBACK   
+=head2 REDIS_IN_CALLBACK
 
-=head2 REDIS_SUBSCRIBED    
+=head2 REDIS_SUBSCRIBED
 
-=head2 REDIS_REPLY_STRING  
+=head2 REDIS_REPLY_STRING
 
-=head2 REDIS_REPLY_ARRAY   
+=head2 REDIS_REPLY_ARRAY
 
-=head2 REDIS_REPLY_INTEGER 
+=head2 REDIS_REPLY_INTEGER
 
-=head2 REDIS_REPLY_NIL     
+=head2 REDIS_REPLY_NIL
 
-=head2 REDIS_REPLY_STATUS  
+=head2 REDIS_REPLY_STATUS
 
-=head2 REDIS_REPLY_ERROR   
+=head2 REDIS_REPLY_ERROR
 
 =head1 SEE ALSO
 

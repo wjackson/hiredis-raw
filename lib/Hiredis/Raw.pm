@@ -1,12 +1,13 @@
 package Hiredis::Raw;
+BEGIN {
+    $Hiredis::Raw::VERSION = '0.04';
+}
 use strict;
 use warnings;
 use XSLoader;
 use XS::Object::Magic;
 
-our $VERSION = '0.03';
-
-XSLoader::load('Hiredis::Raw', $VERSION);
+XSLoader::load('Hiredis::Raw', $Hiredis::Raw::VERSION);
 
 require Hiredis::Async;
 

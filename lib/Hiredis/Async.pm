@@ -1,4 +1,7 @@
 package Hiredis::Async;
+BEGIN {
+    $Hiredis::Async::VERSION = '0.04';
+}
 use strict;
 use warnings;
 use Hiredis::Raw;
@@ -68,11 +71,11 @@ Hiredis::Async - Perl binding for asychronous hiredis API
 
 =head1 DESCRIPTION
 
-C<Hiredis::Async> contains Perl bindings for the asynchronous features of the
+C<Hiredis::Async> contains Perl binding for the asynchronous features of the
 hiredis C library (L<https://github.com/antirez/hiredis>).  Its intended
 purpose is to allow event loops to easily take advantage of the hiredis async
 features.  If you just want to use these features and don't care about event
-loop integration you should check out <AnyEvent::Hiredis> instead.
+loop integration you should check out L<AnyEvent::Hiredis> instead.
 
 The main entry point C<Command> is how you interact with the Redis server.  It
 takes two arguments: an array ref containing the Redis command and its
@@ -156,6 +159,14 @@ may call callbacks if results are available.
 =head2 HandleWrite
 
 Write as many bytes to the Redis server as possible without blocking.
+
+=head1 INSTALL
+
+C<Hiredis::Async> needs the underlying C<hiredis> C library.  Install it from
+your package management system or from source:
+L<https://github.com/antirez/hiredis> .  If you install C<hiredis> to anywhere
+other than /usr/local or /usr then you'll need to set the environment variable
+HIREDIS_PREFIX before installing this module.
 
 =head1 SEE ALSO
 
