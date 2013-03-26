@@ -1,6 +1,6 @@
 package Hiredis::Raw::Constants;
 BEGIN {
-    $Hiredis::Raw::Constants::VERSION = '0.04';
+    $Hiredis::Raw::Constants::VERSION = '0.05';
 }
 use strict;
 use warnings;
