@@ -49,6 +49,7 @@ name 'Hiredis-Raw';
 license 'Perl_5';
 perl_version '5.010';
 all_from 'lib/Hiredis/Raw.pm';
+readme_from 'lib/Hiredis/Async.pm';
 ppport;
 
 

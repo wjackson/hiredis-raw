@@ -12,3 +12,7 @@
 *.swp
 MANIFEST
 Hiredis-Raw-*.tar.gz
+MANIFEST.bak
+MYMETA.json
+MYMETA.yml
+README
