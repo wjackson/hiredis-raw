@@ -2,8 +2,11 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Exception;
+use POSIX qw/setlocale/;
 
 use Hiredis::Async;
+
+setlocale( &POSIX::LC_ALL, 'C' );
 
 # Redis automatically frees the redis context causing major problems.  We make
 # sure that we can't run any commands after this sort of error.

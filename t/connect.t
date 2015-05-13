@@ -2,10 +2,13 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Exception;
+use POSIX qw/setlocale/;
 
 use IO::Select;
 use Hiredis::Async;
 use t::Redis;
+
+setlocale( &POSIX::LC_ALL, 'C' );
 
 { # Connection failure test
 
