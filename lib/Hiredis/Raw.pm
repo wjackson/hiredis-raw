@@ -1,6 +1,6 @@
 package Hiredis::Raw;
 BEGIN {
-    $Hiredis::Raw::VERSION = '0.05';
+    $Hiredis::Raw::VERSION = '0.06';
 }
 use strict;
 use warnings;
