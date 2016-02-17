@@ -1,6 +1,6 @@
 package Hiredis::Async;
 BEGIN {
-    $Hiredis::Async::VERSION = '0.06';
+    $Hiredis::Async::VERSION = '0.07';
 }
 use strict;
 use warnings;
