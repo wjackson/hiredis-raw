@@ -140,10 +140,6 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     c        = _privdata;
     callback = c->callback;
 
-    Safefree(c->argv);
-    Safefree(c->arglen);
-    Safefree(c);
-
     dSP;
     ENTER;
     SAVETMPS;
@@ -176,8 +172,15 @@ void redisAsyncHandleCallback(redisAsyncContext *ac, void *_reply, void *_privda
     FREETMPS;
     LEAVE;
 
-    SvREFCNT_dec(callback);
     SvREFCNT_dec(result);
+
+    /* Unless we're subscribed, cleanup the callback */
+    if (!(ac->c.flags & REDIS_SUBSCRIBED)) {
+        SvREFCNT_dec((SV*)c->callback);
+        Safefree(c->argv);
+        Safefree(c->arglen);
+        Safefree(c);
+    }
 }
 
 MODULE = Hiredis::Raw	PACKAGE = Hiredis::Raw   PREFIX = redis
